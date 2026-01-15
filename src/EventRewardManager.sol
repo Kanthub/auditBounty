@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./AuditBountyManagerStorage.sol";
+import "./EventRewardManagerStorage.sol";
 
 /**
  * @title AuditBountyManager
@@ -130,6 +130,8 @@ contract AuditBountyManager is Initializable, AccessControlUpgradeable, Reentran
             pendingRewards[token][user] += amount;
             totalPendingByToken[token] += amount;
 
+            require(totalPendingByToken[token] <= IERC20(token).balanceOf(address(this)), "Overflow");
+
             emit RewardAdded(token, user, amount, msg.sender);
         }
     }
@@ -161,6 +163,8 @@ contract AuditBountyManager is Initializable, AccessControlUpgradeable, Reentran
             } else if (oldAmount > newAmount) {
                 totalPendingByToken[token] -= (oldAmount - newAmount);
             }
+
+            require(totalPendingByToken[token] <= IERC20(token).balanceOf(address(this)), "Overflow");
 
             pendingRewards[token][user] = newAmount;
 
